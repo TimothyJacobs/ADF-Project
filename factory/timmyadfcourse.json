@@ -1,0 +1,9 @@
+{
+	"name": "timmyadfcourse",
+	"location": "southafricanorth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "da2fb23b-b0bd-4836-bed7-3f7079c070fe",
+		"tenantId": "f5ea3467-a1df-4d7e-a894-9a0c66d9b19e"
+	}
+}
