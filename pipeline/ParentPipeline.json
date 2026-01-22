@@ -1,0 +1,54 @@
+{
+	"name": "ParentPipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "IcrementalPipelineThree",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Execute Pipeline",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-28.southafricawest.logic.azure.com:443/workflows/0fac02800de04028b11ae40fff9d7209/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=_F_X4G-H26pPT175AE83kIC7O5aHxi2KKrgZjDxIAzU",
+					"body": {
+						"value": "{\n  \"pipeline_name\": \"@{pipeline().Pipeline}\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"status\": \"@{activity('Execute Pipeline').Status}\",\n  \"error\": \"@{if(equals(activity('Execute Pipeline').Status, 'Failed'), string(activity('Execute Pipeline').error), 'No error')}\"\n}\n\n\n}",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-01-20T21:10:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

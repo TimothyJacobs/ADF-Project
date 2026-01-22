@@ -1,12 +1,12 @@
 {
-	"name": "DelimitedText1",
+	"name": "ParametersDataSet",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"filname": {
+			"filename": {
 				"type": "string"
 			}
 		},
@@ -16,10 +16,10 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@dataset().filname",
+					"value": "@dataset().filename",
 					"type": "Expression"
 				},
-				"folderPath": "CRMsource",
+				"folderPath": "trigger",
 				"fileSystem": "source"
 			},
 			"columnDelimiter": ",",

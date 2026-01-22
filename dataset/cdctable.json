@@ -1,0 +1,69 @@
+{
+	"name": "cdctable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "DealershipID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DealershipName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "OwnerName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "City",
+				"type": "nvarchar"
+			},
+			{
+				"name": "State",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PhoneNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Email",
+				"type": "nvarchar"
+			},
+			{
+				"name": "EstablishedYear",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TotalSalesLastYear",
+				"type": "decimal",
+				"precision": 15,
+				"scale": 2
+			},
+			{
+				"name": "NumberOfEmployees",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "InsertedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "CarDealership"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

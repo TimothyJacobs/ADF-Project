@@ -1,6 +1,36 @@
 {
 	"name": "pipeline1",
 	"properties": {
-		"annotations": []
-	}
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT MAX(Inserteddate) FROM CarDealership ",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "cdctable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-01-21T16:06:01Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

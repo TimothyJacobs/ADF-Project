@@ -1,0 +1,131 @@
+{
+	"name": "SchemaPipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "Datasource",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Metadata1').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@if(equals(item().name, 'AI_Impact_on_Jobs_2030.csv'), pipeline().parameters.AI_Jobs_Data, if(equals(item().name, 'UserDetailsData.csv'), pipeline().parameters.UserDetailsSchema, ''))",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DelimitedText1",
+									"type": "DatasetReference",
+									"parameters": {
+										"filname": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataSink",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"UserDetailsSchema": {
+				"type": "object",
+				"defaultValue": " \"translator\": {             \"type\": \"TabularTranslator\",             \"mappings\": [                 {                     \"source\": {                         \"name\": \"Name\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Name\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Surname\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Surname\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Age\",                         \"type\": \"Int32\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Age\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"JobTitle\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"JobTitle\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Department\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Department\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 }             ],             \"typeConversion\": true,             \"typeConversionSettings\": {                 \"allowDataTruncation\": true,                 \"treatBooleanAsNumber\": false             }         }"
+			},
+			"AI_Jobs_Data": {
+				"type": "object",
+				"defaultValue": "\"translator\": {             \"type\": \"TabularTranslator\",             \"mappings\": [                 {                     \"source\": {                         \"name\": \"Job_Title\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Job_Title\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Average_Salary\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Average_Salary\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Years_Experience\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Years_Experience\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Education_Level\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Education_Level\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"AI_Exposure_Index\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"AI_Exposure_Index\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Tech_Growth_Factor\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Tech_Growth_Factor\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Automation_Probability_2030\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Automation_Probability_2030\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Risk_Category\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Risk_Category\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_1\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_1\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_2\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_2\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_3\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_3\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_4\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_4\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_5\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_5\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_6\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_6\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_7\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_7\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_8\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_8\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_9\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_9\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 },                 {                     \"source\": {                         \"name\": \"Skill_10\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     },                     \"sink\": {                         \"name\": \"Skill_10\",                         \"type\": \"String\",                         \"physicalType\": \"String\"                     }                 }             ],             \"typeConversion\": true,             \"typeConversionSettings\": {                 \"allowDataTruncation\": true,                 \"treatBooleanAsNumber\": false             }         }"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-01-22T15:06:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

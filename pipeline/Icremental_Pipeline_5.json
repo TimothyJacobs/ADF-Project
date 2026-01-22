@@ -1,0 +1,257 @@
+{
+	"name": "Icremental_Pipeline_5",
+	"properties": {
+		"activities": [
+			{
+				"name": "watermarkCDC",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "cdc",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Pre-flight check",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "watermarkCDC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "SELECT COUNT(*) AS 'TotalCount'\nFROM   @{pipeline().parameters.schema}.@{pipeline().parameters.table}\nWHERE InsertedDate > '@{activity('watermarkCDC').output.firstRow.lastupdateddate}'",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Pre-flight check",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('Pre-flight check').output.resultSets[0].rows[0].TotalCount,0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "CopyIncrementalDataLoad_copy1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT *\nFROM   @{pipeline().parameters.schema}.@{pipeline().parameters.table}\nWHERE InsertedDate > '@{activity('watermarkCDC').output.firstRow.lastupdateddate}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DatabaseDataIncrementalLoad",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Parquet1",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "change Data Capture",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "MAX_CDC",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"additionalColumns": [
+										{
+											"name": "lastupdateddate",
+											"value": {
+												"value": "@activity('MAX_CDC').output.firstRow.InsertedDate",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "EmptyJSon",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "cdc",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "MAX_CDC",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "CopyIncrementalDataLoad_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "SELECT MAX(Inserteddate)AS InsertedDate\r\n FROM CarDealership ",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "cdctable",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"schema": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"table": {
+				"type": "string",
+				"defaultValue": "CarDealership"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-01-21T16:35:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
