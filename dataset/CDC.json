@@ -1,0 +1,27 @@
+{
+	"name": "CDC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "cdc.json",
+				"folderPath": "watermark",
+				"fileSystem": "watermark"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"lastupdateddate": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
