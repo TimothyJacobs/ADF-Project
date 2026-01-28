@@ -19,7 +19,8 @@
 					"value": "@dataset().filenamesink",
 					"type": "Expression"
 				},
-				"folderPath": "bulk"
+				"folderPath": "Reportingsink",
+				"fileSystem": "sink"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",

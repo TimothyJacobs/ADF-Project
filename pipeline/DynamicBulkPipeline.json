@@ -133,7 +133,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"filenamesink": {
-											"value": "@concat(item().name,formatDateTime(utcNow(), 'dd MMMM yyyy'))",
+											"value": "@concat(item().name, ' ',formatDateTime(utcNow(), 'dd MMMM yyyy'))",
 											"type": "Expression"
 										}
 									}
