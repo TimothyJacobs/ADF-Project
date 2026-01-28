@@ -1,0 +1,27 @@
+{
+	"name": "RevenueSinkDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat('Revenue', formatDateTime(addDays(startOfMonth(utcNow()), -1), 'dd MMMM yyyy'), 'Ending', formatDateTime(utcNow(), 'dd MMMM yyyy'))",
+					"type": "Expression"
+				},
+				"folderPath": "Gold_Files",
+				"fileSystem": "sink"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
